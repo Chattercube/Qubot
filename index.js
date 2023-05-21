@@ -23,7 +23,7 @@ if (command == 'ping'){
 require('dotenv').config();
 const keepAlive = require(`./server`);
 const { Client } = require('discord.js');
-const client = new Client({ intents: 32767 });
+const client = new Client({ intents: 65535 });
 
 
 // Array of Command objects
