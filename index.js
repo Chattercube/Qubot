@@ -1,34 +1,13 @@
 // Requirements and Variables
+import {process_command} from "./cmd.js";
 require('dotenv').config();
 const keepAlive = require(`./server`);
 const { Client } = require('discord.js');
 const client = new Client({ intents: 32767 });
 
-// Array of Command objects
-const cmds = [{
-    name: `ping`, // Command name
-    description: `Ping!`, // Command description
-    async execute(interaction) { // Execute function
-        await interaction.reply({
-            content: `Pong.`
-        });
-    }
-}]
 
-// Interaction Create Event
-client.on('interactionCreate', async interaction => {
-    if (interaction.isCommand()) {
-        await cmds.forEach(async command => {
-            if (interaction.commandName == command.name) {
-                try {
-                    await command.execute(interaction);
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        });
-    }
-});
+// Array of Command objects
+client.on('messageCreate', process_command);
 
 // Ready Event
 client.on('ready', async () => {
