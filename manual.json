@@ -1,0 +1,10 @@
+{
+  "man": {
+    "usage": "man / man <command>",
+    "desc": "provide help for <command>"
+  },
+  "ping": {
+    "usage": "ping",
+    "desc": "respond with pong"
+  }
+}
