@@ -13,75 +13,88 @@ async function process_command(message) {
   console.log(args)
 
   if (args[0] == 'ping') {
-    msg = await message.channel.send("pong");
+    const msg = await message.channel.send("pong");
     msg.react("🤔")
   }
 
-  if (args[0] == "mod" && args.length == 1){
-    if(message.member.roles.cache.some(r => r.name == MOD_ROLENAME)){
+  if (args[0] == "mod" && args.length == 1) {
+    if (message.member.roles.cache.some(r => r.name == MOD_ROLENAME)) {
       msg = message.channel.send("You are a moderator");
-    } else{
+    } else {
       msg = message.channel.send("You are not in the sudoers file");
     }
   }
 
-  if (args[0] == "man" && args.length == 1){
+  if (args[0] == "man" && args.length == 1) {
     const fs = require('fs');
     let rawdata = fs.readFileSync('manual.json')
     let manual = JSON.parse(rawdata);
     let embed_description = "";
-    for (manual_entry in manual){
+    for (manual_entry in manual) {
       console.log(`${manual_entry} : ${manual[manual_entry].usage}`);
       embed_description += `\`${manual_entry}\` : ${manual[manual_entry].usage}\n`;
     };
 
     const embed_msg = {
-      color : 0x0b8edf,
-      title : "Instructions",
-      description : embed_description
+      color: 0x0b8edf,
+      title: "Instructions",
+      description: embed_description
     };
 
-    message.author.send({embeds: [embed_msg]});
+    message.author.send({ embeds: [embed_msg] });
+
+  }
+
+  if (args[0] == "countdown" && +args[1] && args[2] != null) {
+
+
+    const msg = await message.channel.send(`Reminding <t:${Math.floor((new Date().getTime() + 1000 * Number(args[1])) / 1000)}:R>`);
+    setTimeout(() => {
+
+        const embed_msg = {
+          color: 0x0b8edf,
+          title: "Countdown Reminder",
+          description: args.splice(2).join(" ")
+        };
+    
+        msg.channel.send({ embeds: [embed_msg] });
+        msg.delete();
+
+      }, Number(args[1] * 1000));
     
   }
 
-  if (args[0] == "countdown" && +args[1] && args[2] != null){
-
-
-    const msg = message.channel.send(`Reminding <t:${Math.round((new Date().getTime() + 1000 * Number(args[1]))/1000)}:R>`);
-
-    countdownTask = new Task();
-    countdownTask.channel = message.channel;
-    countdownTask.author = message.author;
-    countdownTask.expiry_time = new Date().getTime() + 86400;
-    countdownTask.data = { original_msg : msg , deadline: new Date().getTime() + 1000 * Number(args[1]), reminder : args.splice(2).join(" ")};
-    countdownTask.mainfunc = async function(){
-        if( new Date().getTime() >= this.data.deadline ){
-
-            const embed_msg = {
-                color : 0x0b8edf,
-                title : "Countdown Reminder",
-                description : this.data.reminder
-            };
-
-            this.data.original_msg.delete();
-            this.channel.send({embeds: [embed_msg]});
-            this.enabled = false;
-            this.expiry_time = new Date().getTime();
-
-        }
-    };
-
-    global.currentTasks.push(countdownTask);
-
-
-
+  if (args[0] == "tasks") {
+    console.log(global.currentTasks);
   }
 
-  if (args[0] == "tasks"){
-    console.log(global.currentTasks);
+  if (args[0] == "math") {
+
+    const n1 = Math.floor(Math.random() * 10);
+    const n2 = Math.floor(Math.random() * 10);
+    const ans = n1 + n2;
+    const msg = await message.author.send(`What is ${n1} + ${n2} ?`);
+
+    const collectorFilter = function(response){
+      return true;
+    };
+
+    const collector = msg.channel.awaitMessages({ filter: collectorFilter, time: 15000, max: 1})
+      .then(function(collected){
+        // console.log(collected);
+        const response = collected.first();
+        if(response.content == ans){
+          response.channel.send("Correct!");
+        } else {
+          response.channel.send(`Wrong! The correct answer is ${ans}`);
+        }
+      }
+    )
+  }
+
+  if(args[0] == "rps" && message.mentions.users.first().user ){
   }
 
 }
 
-module.exports = {process_command};
+module.exports = { process_command };
