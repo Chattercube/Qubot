@@ -48,7 +48,7 @@ async function process_command(message) {
   if (args[0] == "countdown" && +args[1] && args[2] != null){
 
 
-    const msg = await message.channel.send(`Reminding in ${args[1]} seconds`);
+    const msg = message.channel.send(`Reminding <t:${Math.round((new Date().getTime() + 1000 * Number(args[1]))/1000)}:R>`);
 
     countdownTask = new Task();
     countdownTask.channel = message.channel;
@@ -56,8 +56,6 @@ async function process_command(message) {
     countdownTask.expiry_time = new Date().getTime() + 86400;
     countdownTask.data = { original_msg : msg , deadline: new Date().getTime() + 1000 * Number(args[1]), reminder : args.splice(2).join(" ")};
     countdownTask.mainfunc = async function(){
-        // console.log("Running");
-        // this.data.original_msg.edit(`Reminding in ${Math.round((this.data.deadline - new Date().getTime())/1000)} seconds`);
         if( new Date().getTime() >= this.data.deadline ){
 
             const embed_msg = {
@@ -66,6 +64,7 @@ async function process_command(message) {
                 description : this.data.reminder
             };
 
+            this.data.original_msg.delete();
             this.channel.send({embeds: [embed_msg]});
             this.enabled = false;
             this.expiry_time = new Date().getTime();
